@@ -17,17 +17,28 @@
 
 <!-- APP -->
 <div id="app" class="hidden">
-  <h3 id="userDisplay"></h3>
 
-  <select id="groupSelect">
-    <option value="general">General</option>
-    <option value="gaming">Gaming</option>
-  </select>
+  <div class="sidebar">
+    <h3>KamsiChat 💬</h3>
+    <p id="userDisplay"></p>
 
-  <div id="chatBox"></div>
+    <select id="groupSelect">
+      <option value="general">General</option>
+      <option value="gaming">Gaming</option>
+    </select>
+  </div>
 
-  <input id="message" placeholder="Type message">
-  <button onclick="sendMessage()">Send</button>
+  <div class="chat-area">
+
+    <div id="chatBox"></div>
+
+    <div class="input-area">
+      <input id="message" placeholder="Type a message...">
+      <button onclick="sendMessage()">➤</button>
+    </div>
+
+  </div>
+
 </div>
 
 <script type="module" src="app.js"></script>
