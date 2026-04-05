@@ -1,32 +1,109 @@
-body {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: sans-serif;
-  background: #111;
+}
+
+body {
+  background: #0b141a;
   color: white;
+}
+
+/* AUTH */
+#auth {
   text-align: center;
+  margin-top: 100px;
 }
 
-.hidden {
-  display: none;
+#auth input {
+  display: block;
+  margin: 10px auto;
+  padding: 12px;
+  width: 250px;
+  border-radius: 8px;
+  border: none;
 }
 
-#chatBox {
-  height: 300px;
-  overflow-y: auto;
-  border: 1px solid #333;
-  margin: 10px;
-  padding: 10px;
-}
-
-.message {
-  padding: 6px;
+#auth button {
+  padding: 10px 20px;
   margin: 5px;
-  border-radius: 6px;
+  border: none;
+  border-radius: 8px;
+  background: #25d366;
+  color: white;
+}
+
+/* APP LAYOUT */
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 25%;
+  background: #202c33;
+  padding: 15px;
+}
+
+/* CHAT AREA */
+.chat-area {
+  width: 75%;
+  display: flex;
+  flex-direction: column;
+  background: #0b141a;
+}
+
+/* CHAT BOX */
+#chatBox {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* MESSAGE BUBBLES */
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  margin: 6px 0;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .me {
-  background: green;
+  background: #005c4b;
+  align-self: flex-end;
 }
 
 .other {
-  background: gray;
+  background: #202c33;
+  align-self: flex-start;
+}
+
+/* INPUT AREA */
+.input-area {
+  display: flex;
+  padding: 10px;
+  background: #202c33;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
+  margin-right: 10px;
+}
+
+.input-area button {
+  background: #25d366;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
 }
