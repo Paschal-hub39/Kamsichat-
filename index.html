@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>KamsiChat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- AUTH SECTION -->
+<div id="auth">
+  <h2>🔥 KamsiChat Login / Sign Up</h2>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="signUp()">Sign Up</button>
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- APP SECTION -->
+<div id="app" class="hidden">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3>KamsiChat</h3>
+    <p id="userDisplay"></p>
+    <select onchange="changeGroup(this.value)">
+      <option value="general">General</option>
+      <option value="gaming">Gaming</option>
+      <option value="school">School</option>
+    </select>
+  </div>
+
+  <!-- Chat Area -->
+  <div class="chat-area">
+    <div id="chatBox"></div>
+    <p id="typingStatus"></p>
+    
+    <div class="input-area">
+      <input id="message" placeholder="Type a message" 
+             oninput="startTyping()" onblur="stopTyping()">
+      <input type="file" id="imageInput">
+      <button onclick="startRecording()">🎤</button>
+      <button onclick="stopRecording()">⏹</button>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
