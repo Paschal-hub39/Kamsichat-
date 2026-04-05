@@ -1,12 +1,22 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, updateDoc, doc, setDoc } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// 🔥 FIREBASE CONFIG
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// 🔥 YOUR FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyD2OtSczxlyg5J83cH_LppTlmKiZBrnsjM",
   authDomain: "kamsichat-d44c8.firebaseapp.com",
@@ -16,124 +26,89 @@ const firebaseConfig = {
   appId: "1:321241004770:web:752bc021950addc4147cbb"
 };
 
+// INIT
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const auth = getAuth(app);
-const storage = getStorage(app);
+const db = getFirestore(app);
 
-// DOM Elements
-const appDiv = document.getElementById("app");
+// DOM
 const authDiv = document.getElementById("auth");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
+const appDiv = document.getElementById("app");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
 const userDisplay = document.getElementById("userDisplay");
 const chatBox = document.getElementById("chatBox");
 const messageInput = document.getElementById("message");
-const imageInput = document.getElementById("imageInput");
-const typingStatus = document.getElementById("typingStatus");
+const groupSelect = document.getElementById("groupSelect");
 
 let currentUser = null;
-let currentGroup = "general";
-let audioBlob = null;
 
-// 🔐 AUTHENTICATION
+// 🔐 SIGN UP
 window.signUp = async () => {
-  await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+  await createUserWithEmailAndPassword(auth, email.value, password.value);
+  alert("Account created");
 };
 
+// 🔐 LOGIN
 window.login = async () => {
-  await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+  await signInWithEmailAndPassword(auth, email.value, password.value);
 };
 
+// 👤 AUTH STATE
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user.email;
-    userDisplay.innerText = currentUser;
+
+    userDisplay.innerText = "Logged in as: " + currentUser;
+
     authDiv.style.display = "none";
     appDiv.classList.remove("hidden");
+
+    loadMessages();
   }
 });
 
-// 🎤 VOICE RECORDING
-let mediaRecorder, audioChunks = [];
-
-window.startRecording = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  mediaRecorder = new MediaRecorder(stream);
-  audioChunks = [];
-  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-  mediaRecorder.onstop = () => {
-    audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-  };
-  mediaRecorder.start();
-};
-
-window.stopRecording = () => mediaRecorder.stop();
-
 // 💬 SEND MESSAGE
 window.sendMessage = async () => {
-  let imageUrl = "", audioUrl = "";
+  const msg = messageInput.value;
+  const group = groupSelect.value;
 
-  if (imageInput.files[0]) {
-    const imgRef = ref(storage, "img/" + Date.now());
-    await uploadBytes(imgRef, imageInput.files[0]);
-    imageUrl = await getDownloadURL(imgRef);
-  }
-
-  if (audioBlob) {
-    const audRef = ref(storage, "audio/" + Date.now());
-    await uploadBytes(audRef, audioBlob);
-    audioUrl = await getDownloadURL(audRef);
-    audioBlob = null;
-  }
+  if (!msg) return;
 
   await addDoc(collection(db, "messages"), {
-    username: currentUser,
-    message: messageInput.value,
-    group: currentGroup,
-    imageUrl,
-    audioUrl,
-    seen: false,
+    user: currentUser,
+    text: msg,
+    group: group,
     time: Date.now()
   });
 
   messageInput.value = "";
-  imageInput.value = "";
 };
 
-// 👀 REAL-TIME LISTENER
-onSnapshot(query(collection(db, "messages"), orderBy("time")), snap => {
-  chatBox.innerHTML = "";
-  snap.forEach(async d => {
-    const data = d.data();
-    if (data.group !== currentGroup) return;
+// 👀 LOAD MESSAGES
+function loadMessages() {
+  const q = query(collection(db, "messages"), orderBy("time"));
 
-    if (data.username !== currentUser && !data.seen) {
-      await updateDoc(doc(db, "messages", d.id), { seen: true });
-    }
+  onSnapshot(q, (snapshot) => {
+    chatBox.innerHTML = "";
 
-    const div = document.createElement("div");
-    div.className = "message " + (data.username === currentUser ? "me" : "other");
+    snapshot.forEach((doc) => {
+      const data = doc.data();
 
-    const ticks = data.username === currentUser ? (data.seen ? "✓✓" : "✓") : "";
-    let content = `<b>${data.username}</b><br>${data.message} ${ticks}`;
+      if (data.group !== groupSelect.value) return;
 
-    if (data.imageUrl) content += `<br><img src="${data.imageUrl}" width="150">`;
-    if (data.audioUrl) content += `<br><audio controls src="${data.audioUrl}"></audio>`;
+      const div = document.createElement("div");
+      div.classList.add("message");
 
-    div.innerHTML = content;
-    chatBox.appendChild(div);
+      if (data.user === currentUser) {
+        div.classList.add("me");
+      } else {
+        div.classList.add("other");
+      }
+
+      div.innerText = data.user + ": " + data.text;
+
+      chatBox.appendChild(div);
+    });
   });
-});
-
-// ⌨️ TYPING INDICATOR
-window.startTyping = () => setDoc(doc(db, "typing", "status"), { user: currentUser, typing: true });
-window.stopTyping = () => setDoc(doc(db, "typing", "status"), { user: currentUser, typing: false });
-
-onSnapshot(doc(db, "typing", "status"), snap => {
-  const d = snap.data();
-  typingStatus.innerText = d.typing && d.user !== currentUser ? d.user + " is typing..." : "";
-});
-
-// 👥 GROUP SELECTION
-window.changeGroup = g => currentGroup = g;
+}
