@@ -16,7 +16,7 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 🔥 YOUR FIREBASE CONFIG
+// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyD2OtSczxlyg5J83cH_LppTlmKiZBrnsjM",
   authDomain: "kamsichat-d44c8.firebaseapp.com",
@@ -58,13 +58,12 @@ window.login = async () => {
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user.email;
-
     userDisplay.innerText = "Logged in as: " + currentUser;
 
     authDiv.style.display = "none";
     appDiv.classList.remove("hidden");
 
-    loadMessages();
+    startChat(); // 🔥 START LISTENER
   }
 });
 
@@ -85,8 +84,8 @@ window.sendMessage = async () => {
   messageInput.value = "";
 };
 
-// 👀 LOAD MESSAGES
-function loadMessages() {
+// 👀 REAL-TIME CHAT (FIXED)
+function startChat() {
   const q = query(collection(db, "messages"), orderBy("time"));
 
   onSnapshot(q, (snapshot) => {
@@ -95,7 +94,8 @@ function loadMessages() {
     snapshot.forEach((doc) => {
       const data = doc.data();
 
-      if (data.group !== groupSelect.value) return;
+      // 🔥 FIX: safe group check
+      if (data.group && data.group !== groupSelect.value) return;
 
       const div = document.createElement("div");
       div.classList.add("message");
@@ -112,3 +112,8 @@ function loadMessages() {
     });
   });
 }
+
+// 🔄 RELOAD WHEN GROUP CHANGES
+groupSelect.addEventListener("change", () => {
+  startChat();
+});
